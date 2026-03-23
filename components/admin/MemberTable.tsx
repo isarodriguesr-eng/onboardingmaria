@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  MoreHorizontal, 
-  ExternalLink, 
-  CheckCircle2, 
-  Clock, 
+import {
+  MoreHorizontal,
+  ExternalLink,
+  CheckCircle2,
+  Clock,
   AlertCircle,
   UserRoundPen
 } from "lucide-react";
@@ -62,8 +62,8 @@ export function MemberTable() {
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <div className="h-1.5 w-16 bg-neutral-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-[#6135D7]" 
+                    <div
+                      className="h-full bg-[#6135D7]"
                       style={{ width: `${member.progress}%` }}
                     />
                   </div>
@@ -71,27 +71,27 @@ export function MemberTable() {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={cn(
                     "border-none px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
                     member.status === "Active" ? "bg-blue-50 text-blue-600" :
-                    member.status === "Completed" ? "bg-green-50 text-green-600" :
-                    "bg-yellow-50 text-yellow-600"
+                      member.status === "Completed" ? "bg-green-50 text-green-600" :
+                        "bg-yellow-50 text-yellow-600"
                   )}
                 >
                   {member.status === "Active" ? <Clock className="mr-1 h-3 w-3" /> :
-                   member.status === "Completed" ? <CheckCircle2 className="mr-1 h-3 w-3" /> :
-                   <AlertCircle className="mr-1 h-3 w-3" />}
+                    member.status === "Completed" ? <CheckCircle2 className="mr-1 h-3 w-3" /> :
+                      <AlertCircle className="mr-1 h-3 w-3" />}
                   {member.status}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
                 <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#EDE7FB] hover:text-[#6135D7]">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                  <DialogTrigger
+                    render={<Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[#EDE7FB] hover:text-[#6135D7]" />}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
@@ -101,8 +101,8 @@ export function MemberTable() {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        {/* Placeholder for Edit Form */}
-                        <p className="text-sm text-neutral-gray-500 italic">Campos de edição de progresso e status serão implementados aqui.</p>
+                      {/* Placeholder for Edit Form */}
+                      <p className="text-sm text-neutral-gray-500 italic">Campos de edição de progresso e status serão implementados aqui.</p>
                     </div>
                     <DialogFooter>
                       <Button type="submit" className="bg-[#6135D7]">Salvar Alterações</Button>
@@ -119,5 +119,5 @@ export function MemberTable() {
 }
 
 function cn(...inputs: any[]) {
-    return inputs.filter(Boolean).join(" ");
+  return inputs.filter(Boolean).join(" ");
 }
