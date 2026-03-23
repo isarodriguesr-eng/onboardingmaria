@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(MEMBER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  progress     MemberProgress[]
+  quizAttempts QuizAttempt[]
+  files        UploadedFile[]
+  certificate  Certificate?
+  meetings     Meeting[]
+  badges       UserBadge[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ─── Journey Entities ─────────────────────────────────────
+
+enum StepType {
+  CONTRACT
+  KICKOFF
+  UPLOAD
+  VIDEO
+  QUIZ
+  CERTIFICATE
+}
+
+enum ProgressStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Step {
+  id          String    @id @default(cuid())
+  order       Int
+  title       String
+  type        StepType
+  content     String?   @db.Text
+  isLocked    Boolean   @default(false)
+  
+  progress    MemberProgress[]
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  files       UploadedFile[]
+  materials   Material[]
+  checklists  ChecklistItem[]
+}
+
+model MemberProgress {
+  id          String         @id @default(cuid())
+  userId      String
+  stepId      String
+  status      ProgressStatus @default(PENDING)
+  completedAt DateTime?
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step        Step @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stepId])
+}
+
+model Meeting {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  date        DateTime
+  time        String?
+  link        String?
+  done        Boolean   @default(false)
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuizQuestion {
+  id           String   @id @default(cuid())
+  stepId       String
+  question     String   @db.Text
+  options      String[]
+  correctIndex Int
+
+  step         Step @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  stepId      String
+  score       Int
+  passed      Boolean
+  attemptedAt DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step        Step @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model UploadedFile {
+  id          String   @id @default(cuid())
+  userId      String
+  stepId      String
+  filename    String
+  url         String
+  type        String
+  uploadedAt  DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step        Step @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  pdfUrl      String
+  issuedAt    DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Gamification & Content ──────────────────────────────
+
+model Badge {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  icon        String      // Lucide icon name or emoji
+  criteria    String      @db.Text
+  xpReward    Int         @default(0)
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model ChecklistItem {
+  id          String   @id @default(cuid())
+  stepId      String
+  title       String
+  isRequired  Boolean  @default(false)
+  order       Int
+
+  step        Step     @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model Material {
+  id           String   @id @default(cuid())
+  stepId       String
+  title        String
+  type         String   // pdf or video
+  url          String
+  thumbnailUrl String?
+
+  step         Step     @relation(fields: [stepId], references: [id], onDelete: Cascade)
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  title        String
+  description  String   @db.Text
+  thumbnailUrl String?
+  price        Float
+  paymentUrl   String   // Stripe Payment Link
+  order        Int
+  createdAt    DateTime @default(now())
+}
