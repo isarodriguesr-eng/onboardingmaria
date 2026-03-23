@@ -17,7 +17,7 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle,
-  UserEdit
+  UserRoundPen
 } from "lucide-react";
 import {
   Dialog,
